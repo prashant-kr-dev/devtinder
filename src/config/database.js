@@ -8,10 +8,17 @@ const app = express();
 const PORT = 3000;
 
 // MongoDB connection string URL
-const databaseUrl = 'mongodb+srv://namastedev:i6tu8hf2aLf5_dd@namastenode.izq2yge.mongodb.net/?appName=NamasteNode';
+const databaseUrl = 'mongodb+srv://namastedev:i6tu8hf2aLf5_dd@namastenode.izq2yge.mongodb.net/devTinder';
 
+const connectDB = async () => {
+    await mongoose.connect(databaseUrl);
+}
+
+module.exports = {
+    connectDB, PORT
+}
 // Connect to MongoDB using Mongoose
-mongoose.connect(databaseUrl)
+/* mongoose.connect(databaseUrl)
     .then(() => {
         console.log('Connected to MongoDB');
         // Start the server only after database connection is successful
@@ -19,4 +26,4 @@ mongoose.connect(databaseUrl)
     })
     .catch((err) => {
         console.error('Database connection error:', err);
-    });
+    }); */
