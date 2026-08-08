@@ -1,11 +1,36 @@
-const express = require("express")
+const express = require("express");
+const bcrypt = require('bcrypt');
 const app = express();
 const { adminAuth, userAuth } = require("./middleware/auth");
 const { connectDB, PORT } = require("./config/database");
+const { validateSignUpData } = require('./utils/validation');
 const { User } = require("./models/user");
 const port = 3000;
 
 app.use(express.json());
+
+// login API
+
+app.post("/login", async (req, res) => {
+    try {
+        const { emailId, password } = req.body;
+        const user = await User.findOne({ emailId: emailId });
+
+        if (!user) {
+            throw new Error("Invalid credential");
+        }
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            throw new Error("Invalid credential");
+        }
+        else {
+            res.send("login successful");
+        }
+
+    } catch (err) {
+        res.status(400).send("LOGIN FAILED:" + err.message);
+    }
+})
 
 // Update data of the user
 app.patch("/user/:userId", async (req, res) => {
@@ -86,14 +111,24 @@ app.get('/user', async (req, res) => {
 })
 
 app.post("/signup", async (req, res) => {
-    // creating a user instances of the user model
-    const user = new User(req.body);
     try {
+        // validate the req.body
+        validateSignUpData(req);
+        // creating a user instances of the user model
+        const { firstName, lastName, password, emailId } = req.body;
+
+        const hashPassword = await bcrypt.hash(password, 10);
+        const user = new User({
+            firstName,
+            lastName,
+            password: hashPassword,
+            emailId
+        });
         await user.save();
         res.send("user added successfully");
 
     } catch (error) {
-        res.status(400).send("Error : saving the user - " + error.message);
+        res.status(400).send("Error : " + error.message);
     }
 })
 
