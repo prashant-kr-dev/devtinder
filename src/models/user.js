@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const jwt = require("jsonwebtoken");
+const bcrypt = require('bcrypt');
 
 const userSchema = new mongoose.Schema(
     {
@@ -26,7 +28,7 @@ const userSchema = new mongoose.Schema(
         },
         password: {
             type: String,
-            required: true,            
+            required: true,
             validate(value) {
                 if (!validator.isStrongPassword(value)) {
                     throw new Error("Enter strong password")
@@ -47,7 +49,7 @@ const userSchema = new mongoose.Schema(
         },
         photoUrl: {
             type: String,
-            default: "https://geographyandyou.com/images/user-profile.png",            
+            default: "https://geographyandyou.com/images/user-profile.png",
             validate(value) {
                 if (!validator.isURL(value)) {
                     throw new Error("Enter valid photo url id")
@@ -66,6 +68,19 @@ const userSchema = new mongoose.Schema(
         timestamps: true,
     }
 );
+
+userSchema.methods.getJWT = async function () {
+    const user = this;
+    const token = await jwt.sign({ _id: user._id }, "jwtKey@devTinder123", { expiresIn: '1h' });
+    return token;
+}
+
+userSchema.methods.validatePassword = async function (passwordInputByUser){
+    const user = this;
+    const passwordHash = user.password;
+    const isPasswordValid = await bcrypt.compare(passwordInputByUser, passwordHash);
+    return isPasswordValid;
+}
 
 const User = mongoose.model('User', userSchema);
 
