@@ -10,10 +10,13 @@ app.use(express.json());
 app.patch('/user', async (req, res) => {
     try {
 
-        const userPatch = await User.findByIdAndUpdate({ _id: req.body.userId }, { $set: req.body });
+        const userPatch = await User.findByIdAndUpdate({ _id: req.body.userId }, { $set: req.body }, {
+            returnDocument: "after",
+            runValidators: true,
+        });
         res.send("user updated successfully");
     } catch (err) {
-        res.status(400).send("something went wrong in patch user");
+        res.status(400).send("UPDATE FAILED:" + err.message);
     }
 })
 
