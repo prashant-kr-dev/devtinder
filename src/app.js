@@ -5,9 +5,34 @@ const { adminAuth, userAuth } = require("./middleware/auth");
 const { connectDB, PORT } = require("./config/database");
 const { validateSignUpData } = require('./utils/validation');
 const { User } = require("./models/user");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken")
 const port = 3000;
 
 app.use(express.json());
+app.use(cookieParser());
+
+//get profile API
+
+app.get("/profile", async (req, res) => {
+    try {
+        const cookies = req.cookies;
+        const { token } = cookies;
+        if (!token) {
+            throw new Error("Invalid token")
+        }
+        const decodeMessage = await jwt.verify(token, "jwtKey@devTinder123");
+        const {_id} = decodeMessage;
+        const user = await User.findById(_id);
+         if (!user) {
+            throw new Error("Invalid user or token")
+        }
+        res.send(user);
+
+    } catch (err) {
+        res.status(400).send("PROFILE FAILED:" + err.message);
+    }
+})
 
 // login API
 
@@ -24,6 +49,8 @@ app.post("/login", async (req, res) => {
             throw new Error("Invalid credential");
         }
         else {
+            const token = await jwt.sign({ _id: user._id }, "jwtKey@devTinder123")
+            res.cookie("token", token);
             res.send("login successful");
         }
 
