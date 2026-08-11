@@ -22,7 +22,7 @@ authRouter.post("/login", async (req, res) => {
                 expires: new Date(Date.now() + 9 * 60 * 1000), // 9 minutes from now
                 httpOnly: true
             });
-            res.send("login successful");
+            res.send(user);
         }
 
     } catch (err) {
