@@ -77,13 +77,10 @@ requestRouter.post(
                 return res.status(400).json({ messaage: "Status not allowed!" });
             }
 
-            console.log(requestId);
-            console.log(loggedInUser._id.toString());
-            console.log(status);
 
             const connectionRequest = await ConnectionRequest.findOne({
-                fromUserId: requestId,
-                toUserId: loggedInUser._id,
+                fromUserId: requestId.toString(),
+                toUserId: loggedInUser._id.toString(),
                 status: "interested",
             });
             if (!connectionRequest) {
